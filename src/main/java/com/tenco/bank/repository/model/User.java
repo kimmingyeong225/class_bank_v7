@@ -19,5 +19,4 @@ public class User {
 	private String pssword;
 	private String fullname;
 	private Timestamp createdAt;
-
 }
