@@ -14,14 +14,14 @@ import com.tenco.bank.repository.interfaces.UserRepository;
 @Service // IoC 대상 (싱글톤으로 관리)
 public class UserService {
 
-	@Autowired // 자동으로 객체 반환
 	private UserRepository userRepository;
 
 //  @Autowired  어노테이션으로 대체 가능하다.
 //  생성자읜존 주입 - DI
-//	public UserService(UserRepository userRepository) {
-//		this.userRepository = userRepository;
-//	}
+	@Autowired
+	public UserService(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
 	
 	
 	// 회원 가입 처리
