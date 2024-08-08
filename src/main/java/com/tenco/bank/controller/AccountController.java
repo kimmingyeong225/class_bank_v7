@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.tenco.bank.dto.SaveDTO;
+import com.tenco.bank.dto.WithdrawalDTO;
 import com.tenco.bank.handler.exception.DataDeliveryException;
 import com.tenco.bank.handler.exception.UnAuthorizedException;
 import com.tenco.bank.repository.model.Account;
 import com.tenco.bank.repository.model.User;
 import com.tenco.bank.service.AccountService;
+import com.tenco.bank.utils.Define;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -42,9 +44,9 @@ public class AccountController {
 	public String savePage() {
 		
 		// 1. 인증 검사가 필요(account 전체 필요함)
-		User principal = (User) session.getAttribute("principal");
+		User principal = (User) session.getAttribute(Define.PRINCIPAL);
 		if(principal == null) {
-			throw new UnAuthorizedException("인증된 사용자가 아닙니다.", HttpStatus.UNAUTHORIZED);
+			throw new UnAuthorizedException(Define.NOT_AN_AUTHENTICATED_USER , HttpStatus.UNAUTHORIZED);
 		} 
 		
 		return "account/save";
@@ -62,20 +64,20 @@ public class AccountController {
 		// 2. 인증 검사
 		// 3. 유효성 검사
 		// 4. 서비스 호출 (Service한테 위임 controller는 그냥 넘겨주기만 하면 됨)
-		User principal = (User) session.getAttribute("principal"); // user 정보가 다 들어가 있음
+		User principal = (User) session.getAttribute(Define.PRINCIPAL); // user 정보가 다 들어가 있음
 		if(principal == null) {
-			throw new UnAuthorizedException("인증된 사용자가 아닙니다.", HttpStatus.UNAUTHORIZED);
+			throw new UnAuthorizedException(Define.NOT_AN_AUTHENTICATED_USER, HttpStatus.UNAUTHORIZED);
 		}
 		
 		if(dto.getNumber() == null || dto.getNumber().isEmpty()) {
-			throw new DataDeliveryException("계좌 번호를 입력하세요.", HttpStatus.BAD_REQUEST);
+			throw new DataDeliveryException(Define.ENTER_YOUR_ACCOUNT_NUMBER, HttpStatus.BAD_REQUEST);
 		}
 		if(dto.getPassword() == null || dto.getPassword().isEmpty()) {
-			throw new DataDeliveryException("계좌 비밀번호를 입력하세요.", HttpStatus.BAD_REQUEST);
+			throw new DataDeliveryException(Define.ENTER_YOUR_PASSWORD, HttpStatus.BAD_REQUEST);
 		}
 		// Balance은 long 타입이라 isEmpty가 없음
 		if(dto.getBalance() == null || dto.getBalance() <= 0) {
-			throw new DataDeliveryException("계좌 잔액을 입력하세요.", HttpStatus.BAD_REQUEST);
+			throw new DataDeliveryException(Define.ENTER_YOUR_BALANCE, HttpStatus.BAD_REQUEST);
 		}
 		
 		accountService.createAccount(dto, principal.getId());
@@ -91,9 +93,9 @@ public class AccountController {
 	@GetMapping({"/list", "/"})
 	public String listPage(Model model) {
 		// 1. 인증검사
-		User principal = (User) session.getAttribute("principal");
+		User principal = (User) session.getAttribute(Define.PRINCIPAL);
 		if(principal == null) {
-			throw new UnAuthorizedException("인증된 사용자가 아닙니다.", HttpStatus.UNAUTHORIZED);
+			throw new UnAuthorizedException(Define.NOT_AN_AUTHENTICATED_USER , HttpStatus.UNAUTHORIZED);
 		}
 		
 		// 2. 유효성 검사
@@ -110,6 +112,46 @@ public class AccountController {
 		return "account/list";
 	}
 	
+	/**
+	 * 출금 페이지 요청
+	 * @return withdrawal.jsp
+	 */
+	@GetMapping("/withdrawal")
+	public String withdrawalPage() {
+		// 1. 인증검사
+		User principal = (User) session.getAttribute(Define.PRINCIPAL);
+		if(principal == null) {
+			throw new UnAuthorizedException(Define.NOT_AN_AUTHENTICATED_USER , HttpStatus.UNAUTHORIZED);
+		}
+		
+		return "account/withdrawal";
+	}
 
+	@PostMapping("/withdrawal")
+	public String withdrawalProc(WithdrawalDTO dto) {
+		// 1. 인증검사
+				User principal = (User) session.getAttribute(Define.PRINCIPAL);
+				if(principal == null) {
+					throw new UnAuthorizedException(Define.NOT_AN_AUTHENTICATED_USER , HttpStatus.UNAUTHORIZED);
+				}
+				
+		// 유효성 검사 (자바 코드를 개발) --> 스프링 부트 @Valid 라이브러리가 존재
+			if(dto.getAmount() == null) {
+				throw new DataDeliveryException(Define.ENTER_YOUR_BALANCE, HttpStatus.BAD_REQUEST);
+			}
+			if(dto.getAmount().longValue() <= 0) {
+				throw new DataDeliveryException(Define.W_BALANCE_VALUE, HttpStatus.BAD_REQUEST);
+			}
+			if(dto.getWAccountNumber() == null) {
+				throw new DataDeliveryException(Define.ENTER_YOUR_ACCOUNT_NUMBER, HttpStatus.BAD_REQUEST);
+			}
+			if(dto.getWAccountPassword() == null || dto.getWAccountPassword().isEmpty()) {
+				throw new DataDeliveryException(Define.ENTER_YOUR_PASSWORD, HttpStatus.BAD_REQUEST);
+			}
+			
+			accountService.updateAccountWithdraw(dto, principal.getId());
+		
+		return "redirect:/account/list";
+	}
 	
 }
