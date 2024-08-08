@@ -53,4 +53,5 @@ public class Account {
 			throw new DataDeliveryException(Define.NOT_ACCOUNT_OWNER, HttpStatus.BAD_REQUEST);
 		}
 	}
+
 }
