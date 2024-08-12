@@ -25,7 +25,7 @@
 					<c:forEach var="account" items="${accountList}">
 						<tr>
 							<th><a href="/account/detail/${account.id}?type=all">${account.number}</a></th>
-							<th>${account.balance}</th>
+							<th>${account.formatKoreanWon(account.balance)}</th>
 						</tr>
 					</c:forEach>
 				</tbody>

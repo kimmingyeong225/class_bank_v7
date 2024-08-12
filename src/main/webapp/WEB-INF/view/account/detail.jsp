@@ -10,7 +10,7 @@
 
 	<div class="bg-light p-md-5">
 		<div class="user--box">
-			${principal.username}님 계좌 <br> 계좌번호 : ${account.number} <br> 잔액 : ${account.balance}원
+			${principal.username}님 계좌 <br> 계좌번호 : ${account.number} <br> 잔액 : ${account.formatKoreanWon(account.balance)}
 		</div>
 		<br>
 		<div>
@@ -19,7 +19,7 @@
 			<a href="/account/detail/${account.id}?type=withdrawal" class="btn btn-outline-primary">출금</a>&nbsp;
 		</div>
 		<br>
-		<table class="table table-striped">
+		<table class="table table-striped" >
 			<thead>
 				<tr>
 					<th>날짜</th>
@@ -30,13 +30,13 @@
 				</tr>
 			</thead>
 			<tbody>
-				<c:forEach var="history" items="${historyList}">
+				<c:forEach var="historyAccount" items="${historyList}">
 				<tr>
-					<th>${history.createdAt}</th>
-					<th>${history.sender}</th>
-					<th>${history.receiver}</th>
-					<th>${history.amount}</th>
-					<th>${history.balance}</th>
+					<th>${historyAccount.timestampToString(historyAccount.createdAt)}</th>
+					<th>${historyAccount.sender}</th>
+					<th>${historyAccount.receiver}</th>
+					<th>${historyAccount.formatKoreanWon(historyAccount.amount)}</th>
+					<th>${historyAccount.formatKoreanWon(historyAccount.balance)}</th>
 				</tr>
 				
 				</c:forEach>
