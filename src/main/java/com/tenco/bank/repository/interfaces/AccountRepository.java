@@ -22,4 +22,8 @@ public interface AccountRepository {
 	public List<Account> findByUserId(@Param("userId") Integer principalId);
 	// --> account id 값으로 계좌 정보 조회
 	public Account findByNumber(@Param("number") String id);
+	
+	//
+	public Account findByAccountId(Integer accountId);
+	
 }
